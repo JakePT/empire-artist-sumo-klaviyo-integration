@@ -78,7 +78,7 @@ class Plugin {
 	 */
 	private function subscribe_actions( HasActions $subscriber ) {
 		foreach ( $subscriber->get_actions() as $action => $args ) {
-			add_action( $action, [ $subscriber, $args[0] ], $args[1], $args[2] );
+			add_action( $action, [ $subscriber, $args[0] ], $args[1] ?? 10, $args[2] ?? 1 );
 		}
 	}
 
@@ -89,7 +89,7 @@ class Plugin {
 	 */
 	private function subscribe_filters( HasFilters $subscriber ) {
 		foreach ( $subscriber->get_filters() as $filter => $args ) {
-			add_filter( $filter, [ $subscriber, $args[0] ], $args[1], $args[2] );
+			add_filter( $filter, [ $subscriber, $args[0] ], $args[1] ?? 10, $args[2] ?? 1 );
 		}
 	}
 

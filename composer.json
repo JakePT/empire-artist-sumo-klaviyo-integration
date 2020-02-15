@@ -1,0 +1,19 @@
+{
+    "name": "magicdust/plugin-name",
+    "description": "Plugin description.",
+    "type": "wordpress-plugin",
+    "authors": [
+        {
+            "name": "Jacob Peattie",
+            "email": "jacob.peattie@magicdust.com.au"
+        }
+    ],
+    "require": {
+        "php": ">=7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "PluginName\\": "src/"
+        }
+    }
+}

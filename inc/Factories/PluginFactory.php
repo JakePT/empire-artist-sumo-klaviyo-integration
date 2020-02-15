@@ -8,6 +8,8 @@ namespace PluginName;
 
 defined( 'ABSPATH' ) || exit;
 
+use PluginName\Plugin;
+
 /**
  * Plugin class factory.
  */

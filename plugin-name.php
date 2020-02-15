@@ -14,13 +14,10 @@ namespace PluginName;
 
 defined( 'ABSPATH' ) || exit;
 
-require_once __DIR__ . '/autoload.php';
-require_once __DIR__ . '/functions.php';
+require_once 'vendor/autoload.php';
+require_once 'functions.php';
 
-/**
- * Run the plugin.
- */
-$plugin_name = PluginFactory::create();
+$plugin_name = Factories\PluginFactory::create();
 
 register_activation_hook( __FILE__, [ $plugin_name, 'activate' ] );
 register_deactivation_hook( __FILE__, [ $plugin_name, 'deactivate' ] );

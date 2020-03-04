@@ -8,6 +8,7 @@ namespace EmpireArtist\KlaviyoSumo;
 
 defined( 'ABSPATH' ) || exit;
 
+use EmpireArtist\KlaviyoSumo\Clients\Klaviyo;
 use EmpireArtist\KlaviyoSumo\Interfaces\HasActions;
 use EmpireArtist\KlaviyoSumo\Interfaces\HasFilters;
 use EmpireArtist\KlaviyoSumo\Subscribers\TrackRewardPoints;

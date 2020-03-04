@@ -8,8 +8,6 @@ namespace EmpireArtist\KlaviyoSumo\Clients;
 
 defined( 'ABSPATH' ) || exit;
 
-use EmpireArtist\KlaviyoSumo\Exceptions\KlaviyoMissingIdentifier;
-
 /**
  * Klaviyo API client.
  */
@@ -53,7 +51,7 @@ class Klaviyo {
 	 */
 	public function track( string $event, array $customer_properties = [], array $properties = [], int $timestamp = 0, bool $once = false ) {
 		if ( empty( $customer_properties['$email'] ) && empty( $customer_properties['$id'] ) ) {
-			throw new KlaviyoMissingIdentifier();
+			return;
 		}
 
 		$data = [

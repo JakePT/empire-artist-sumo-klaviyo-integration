@@ -71,7 +71,7 @@ class TrackMemberships implements HasActions {
 		}
 
 		$unique_key      = sumo_get_plan_key( $membership_id, $plan_id );
-		$plan_slug       = $this->get_membership_plan_slug( $plan_id );
+		$plan_name       = get_the_title( $plan_id );
 		$previous_status = $this->get_membership_status( $membership_id, $unique_key );
 
 		/**
@@ -81,10 +81,10 @@ class TrackMemberships implements HasActions {
 			__( 'Membership Status Changed', 'klaviyo-sumo' ),
 			[
 				'$email'   => $email,
-				$plan_slug => $new_status,
+				$plan_name => $new_status,
 			],
 			[
-				'Plan'            => $plan_slug,
+				'Plan'            => $plan_name,
 				'Previous Status' => $previous_status,
 				'New Status'      => $new_status,
 			]
@@ -106,7 +106,7 @@ class TrackMemberships implements HasActions {
 		 * Prepare properties for tracking request.
 		 */
 		$email              = $this->get_membership_user_email( $membership_id );
-		$plan_slug          = $this->get_membership_plan_slug( $plan_id );
+		$plan_name          = get_the_title( $plan_id );
 		$membership_status  = $this->get_membership_status( $membership_id, $unique_key, $new_member_plans );
 
 		/**
@@ -116,10 +116,10 @@ class TrackMemberships implements HasActions {
 			__( 'New Membership From Order', 'klaviyo-sumo' ),
 			[
 				'$email'   => $email,
-				$plan_slug => $membership_status,
+				$plan_name => $membership_status,
 			],
 			[
-				'Plan' => $plan_slug,
+				'Plan' => $plan_name,
 			]
 		);
 	}
@@ -139,8 +139,8 @@ class TrackMemberships implements HasActions {
 		 * Prepare properties for tracking request.
 		 */
 		$email              = $this->get_membership_user_email( $membership_id );
-		$previous_plan_slug = $this->get_membership_plan_slug( $previous_plan_id );
-		$new_plan_slug      = $this->get_membership_plan_slug( $new_plan_id );
+		$previous_plan_name = get_the_title( $previous_plan_id );
+		$new_plan_name      = get_the_title( $new_plan_id );
 		$membership_status  = $this->get_membership_status( $membership_id, $unique_key );
 
 		/**
@@ -150,12 +150,12 @@ class TrackMemberships implements HasActions {
 			__( 'Membership Plan Changed', 'klaviyo-sumo' ),
 			[
 				'$email'            => $email,
-				$new_plan_slug      => $membership_status,
-				$previous_plan_slug => 'cancelled',
+				$new_plan_name      => $membership_status,
+				$previous_plan_name => 'cancelled',
 			],
 			$event_properties = [
-				'Previous Plan' => $previous_plan_slug,
-				'New Plan'      => $new_plan_slug,
+				'Previous Plan' => $previous_plan_name,
+				'New Plan'      => $new_plan_name,
 			]
 		);
 	}
@@ -176,17 +176,6 @@ class TrackMemberships implements HasActions {
 		}
 
 		return $user->user_email;
-	}
-
-	/**
-	 * Return the slug for a given membership plan.
-	 *
-	 * @param int $plan_id Membership plan ID.
-	 *
-	 * @return string Membership plan slug, or false if none found.
-	 */
-	protected function get_membership_plan_slug( $plan_id ) {
-		return get_post_meta( $plan_id, 'sumomemberships_plan_slug', true );
 	}
 
 	/**

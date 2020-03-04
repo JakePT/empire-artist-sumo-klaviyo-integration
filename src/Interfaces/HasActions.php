@@ -2,9 +2,9 @@
 /**
  * HasActions interface definitions.
  *
- * @package PluginName
+ * @package Klaviyo for SUMO
  */
-namespace PluginName\Interfaces;
+namespace EmpireArtist\KlaviyoSumo\Interfaces;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -2,13 +2,13 @@
 /**
  * PluginFactory class definition.
  *
- * @package PluginName.
+ * @package Klaviyo for SUMO
  */
-namespace PluginName;
+namespace EmpireArtist\KlaviyoSumo\Factories;
 
 defined( 'ABSPATH' ) || exit;
 
-use PluginName\Plugin;
+use EmpireArtist\KlaviyoSumo\Plugin;
 
 /**
  * Plugin class factory.
@@ -19,7 +19,7 @@ class PluginFactory {
 	 *
 	 * @return Plugin Plugin instance.
 	 */
-	public static function get_plugin() {
+	public static function create() {
 		static $plugin = null;
 
 		if ( null === $plugin ) {

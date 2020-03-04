@@ -2,15 +2,16 @@
 /**
  * Plugin class definition.
  *
- * @package PluginNames
+ * @package Klaviyo for SUMO
  */
-namespace PluginName;
+namespace EmpireArtist\KlaviyoSumo;
 
 defined( 'ABSPATH' ) || exit;
 
-use PluginName\Interfaces\HasActions;
-use PluginName\Interfaces\HasFilters;
-use PluginName\Interfaces\HasShortcodes;
+use EmpireArtist\KlaviyoSumo\Interfaces\HasActions;
+use EmpireArtist\KlaviyoSumo\Interfaces\HasFilters;
+use EmpireArtist\KlaviyoSumo\Subscribers\TrackRewardPoints;
+use EmpireArtist\KlaviyoSumo\Subscribers\TrackMemberships;
 
 /**
  * Plugin class.
@@ -27,8 +28,11 @@ class Plugin {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->subscribers = [
+		$settings = (array) get_option( 'klaviyo_settings' );
+		$klaviyo  = new Klaviyo( $settings['klaviyo_public_api_key'] ?? '' );
 
+		$this->subscribers = [
+			'track_memberships'   => new TrackMemberships( $klaviyo ),
 		];
 	}
 
@@ -45,10 +49,6 @@ class Plugin {
 
 			if ( $subscriber instanceof HasFilters ) {
 				$this->subscribe_filters( $subscriber );
-			}
-
-			if ( $subscriber instanceof HasShortcodes ) {
-				$this->subscribe_shortcodes( $subscriber );
 			}
 		}
 	}
@@ -78,7 +78,15 @@ class Plugin {
 	 */
 	private function subscribe_actions( HasActions $subscriber ) {
 		foreach ( $subscriber->get_actions() as $action => $args ) {
-			add_action( $action, [ $subscriber, $args[0] ], $args[1] ?? 10, $args[2] ?? 1 );
+			add_action(
+				$action,
+				[
+					$subscriber,
+					$args[0]
+				],
+				isset( $args[1] ) ? $args[1] : 10,
+				isset( $args[2] ) ? $args[2] : 1
+			);
 		}
 	}
 
@@ -89,18 +97,15 @@ class Plugin {
 	 */
 	private function subscribe_filters( HasFilters $subscriber ) {
 		foreach ( $subscriber->get_filters() as $filter => $args ) {
-			add_filter( $filter, [ $subscriber, $args[0] ], $args[1] ?? 10, $args[2] ?? 1 );
-		}
-	}
-
-	/**
-	 * Register shortcodes for dependencies.
-	 *
-	 * @return void
-	 */
-	private function subscribe_shortcodes( HasShortcodes $subscriber ) {
-		foreach ( $subscriber->get_shortcodes() as $tag => $method ) {
-			add_shortcode( $tag, [ $subscriber, $method ] );
+			add_filter(
+				$filter,
+				[
+					$subscriber,
+					$args[0]
+				],
+				isset( $args[1] ) ? $args[1] : 10,
+				isset( $args[2] ) ? $args[2] : 1
+			);
 		}
 	}
 
@@ -110,6 +115,6 @@ class Plugin {
 	 * @return object Subscriber instance.
 	 */
 	public function get_subscriber( $name ) {
-		return $this->subscribers[$name] ?? false;
+		return isset( $this->subscribers[$name] ) ? $this->subscribers[$name] : false;
 	}
 }

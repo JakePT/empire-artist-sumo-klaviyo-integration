@@ -1,6 +1,6 @@
 {
-    "name": "magicdust/plugin-name",
-    "description": "Plugin description.",
+    "name": "magicdust/empire-artist-sumo-klaviyo-integration",
+    "description": "Klaviyo integration for SUMO Reward Points and SUMO Memberships for Empire Artist.",
     "type": "wordpress-plugin",
     "authors": [
         {
@@ -13,7 +13,7 @@
     },
     "autoload": {
         "psr-4": {
-            "PluginName\\": "src/"
+            "EmpireArtist\\KlaviyoSumo\\": "src/"
         }
     }
 }

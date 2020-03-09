@@ -34,6 +34,7 @@ class Plugin {
 
 		$this->subscribers = [
 			'track_memberships'   => new TrackMemberships( $klaviyo ),
+			'track_reward_points' => new TrackRewardPoints( $klaviyo ),
 		];
 	}
 

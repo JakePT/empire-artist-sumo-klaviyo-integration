@@ -38,27 +38,249 @@ class TrackRewardPoints implements HasActions {
 	 * @see HasActions
 	 */
 	public function get_actions() {
-		// return [
-		// 	'fp_reward_point_for_product_review'             => [],
-		// 	'fp_redeem_reward_points_using_rewardgateway'    => [],
-		// 	'fp_reward_point_for_buying_sumo_reward_points'  => [],
-		// 	'fp_redeem_reward_points_manually'               => [],
-		// 	'fp_redeem_reward_points_automatically'          => [],
-		// 	'rs_delete_points_for_referral_simple'           => [],
-		// 	'fp_reward_point_for_using_coupons'              => [],
-		// 	'fp_reward_point_for_using_gateways'             => [],
-		// 	'fp_reward_point_for_product_purchase'           => [],
-		// 	'fp_reward_point_for_registration'               => [],
-		// 	'fp_reward_point_for_login'                      => [],
-		// 	'fp_reward_point_for_facebook_like'              => [],
-		// 	'fp_reward_point_for_facebook_share'             => [],
-		// 	'fp_reward_point_for_tweet'                      => [],
-		// 	'fp_reward_point_for_twitter_follow'             => [],
-		// 	'fp_reward_point_for_instagram_follow'           => [],
-		// 	'fp_reward_point_for_vk_like'                    => [],
-		// 	'fp_reward_point_for_okru_share'                 => [],
-		// 	'fp_reward_point_for_using_gift_voucher'         => [],
-		// ];
+		return [
+			'fp_redeem_reward_points_manually'              => [ 'track_points_redeemed', 10, 2 ],
+			'fp_redeem_reward_points_automatically'         => [ 'track_points_redeemed', 10, 2 ],
+			'fp_redeem_reward_points_using_rewardgateway'   => [ 'track_points_redeemed', 10, 2 ],
+			'fp_reward_point_for_buying_sumo_reward_points' => [ 'track_points_purchased', 10, 2 ],
+			'fp_reward_point_for_using_coupons'             => [ 'track_points_earned' ],
+			'fp_reward_point_for_product_review'            => [ 'track_points_earned' ],
+			'fp_reward_point_for_using_gateways'            => [ 'track_points_earned' ],
+			'fp_reward_point_for_product_purchase'          => [ 'track_points_earned' ],
+			'fp_reward_point_for_using_gift_voucher'        => [ 'track_points_earned' ],
+			'fp_reward_point_for_facebook_like'             => [ 'track_points_earned' ],
+			'fp_reward_point_for_facebook_share'            => [ 'track_points_earned' ],
+			'fp_reward_point_for_tweet'                     => [ 'track_points_earned' ],
+			'fp_reward_point_for_twitter_follow'            => [ 'track_points_earned' ],
+			'fp_reward_point_for_instagram_follow'          => [ 'track_points_earned' ],
+			'fp_reward_point_for_vk_like'                   => [ 'track_points_earned' ],
+			'fp_reward_point_for_okru_share'                => [ 'track_points_earned' ],
+			'fp_reward_point_for_registration'              => [ 'track_points_earned' ],
+			'fp_reward_point_for_login'                     => [ 'track_points_earned' ],
+			'wp_login'                                      => [ 'identify_points_on_wp_login', 10, 2 ],
+			'sumomemberships_plan_status_changed'           => [ 'identify_points_on_membership_status_change', 10, 2 ],
+			'woocommerce_save_account_details'              => [ 'identify_points_on_save_account_details', 10, 1 ],
+			'woocommerce_thankyou'                          => [ 'identify_points_on_order', 999, 1 ],
+		];
+	}
+
+	/**
+	 * Track points redeemed for order.
+	 *
+	 * @param int $order_id        Order ID.
+	 * @param int $points_redeemed Number of points redeemed.
+	 *
+	 * @return void
+	 */
+	public function track_points_redeemed( $order_id, $points_redeemed ) {
+		$order = wc_get_order( $order_id );
+
+		$this->track_points(
+			__( 'Reward Points Redeemed', 'klaviyo-sumo' ),
+			$order->get_customer_id(),
+			[
+				__( 'Amount', 'klaviyo-sumo' )   => $points_redeemed,
+				__( 'Order ID', 'klaviyo-sumo' ) => $order_id,
+			]
+		);
+	}
+
+	/**
+	 * Track points awarded for purchasing products with "Enable Buying of SUMO
+	 * Reward Points" enabled.
+	 *
+	 * The relevant hook does not pass the ID of the user who performed this
+	 * action, so if an administrator performs the action on behalf of a customer,
+	 * the administrator's point balance will be tracked.
+	 *
+	 * @param int $product_id    Product ID
+	 * @param int $points_earned Number of points earned.
+	 *
+	 * @return void
+	 */
+	public function track_points_purchased( $product_id, $points_earned ) {
+		$this->track_points(
+			__( 'Reward Points Purchased', 'klaviyo-sumo' ),
+			null,
+			[
+				__( 'Amount', 'klaviyo-sumo' )     => $points_earned,
+				__( 'Product ID', 'klaviyo-sumo' ) => $product_id,
+			]
+		);
+	}
+
+	/**
+	 * Track reward points being earned. Pass an event property for the reason
+	 * that the points were earned, based on which hook was fired.
+	 *
+	 * All hooks fired when points are earned do not pass the number of points
+	 * earned, so this is not tracked.
+	 *
+	 * @return void
+	 */
+	public function track_reward_points_earned() {
+		/**
+		 * Determine reason points were earned based on the current hook.
+		 */
+		$hook = current_action();
+
+		switch ( $hook ) {
+			/**
+			 * Coupon Use.
+			 */
+			case 'fp_reward_point_for_using_coupons':
+				$earned_for = __( 'Coupon Use', 'klaviyo-sumo' );
+				break;
+			/**
+			 * Product Review.
+			 */
+			case 'fp_reward_point_for_product_review':
+				$earned_for = __( 'Product Review', 'klaviyo-sumo' );
+				break;
+			/**
+			 * Payment Gateway Use.
+			 */
+			case 'fp_reward_point_for_using_gateways':
+				$earned_for = __( 'Payment Gateway Use', 'klaviyo-sumo' );
+				break;
+			/**
+			 * Product Purchase.
+			 */
+			case 'fp_reward_point_for_product_purchase':
+				$earned_for = __( 'Product Purchase', 'klaviyo-sumo' );
+				break;
+			/**
+			 * Gift Voucher Use.
+			 */
+			case 'fp_reward_point_for_using_gift_voucher':
+				$earned_for = __( 'Gift Voucher Use', 'klaviyo-sumo' );
+				break;
+			/**
+			 * Facebook Like.
+			 */
+			case 'fp_reward_point_for_facebook_like':
+				$earned_for = __( 'Facebook Like', 'klaviyo-sumo' );
+				break;
+			/**
+			 * Facebook Share.
+			 */
+			case 'fp_reward_point_for_facebook_share':
+				$earned_for = __( 'Facebook Share', 'klaviyo-sumo' );
+				break;
+			/**
+			 * Tweet.
+			 */
+			case 'fp_reward_point_for_tweet':
+				$earned_for = __( 'Tweet', 'klaviyo-sumo' );
+				break;
+			/**
+			 * Twitter Follow.
+			 */
+			case 'fp_reward_point_for_twitter_follow':
+				$earned_for = __( 'Twitter Follow', 'klaviyo-sumo' );
+				break;
+			/**
+			 * Instagram Follow.
+			 */
+			case 'fp_reward_point_for_instagram_follow':
+				$earned_for = __( 'Instagram Follow', 'klaviyo-sumo' );
+				break;
+			/**
+			 * VK Like.
+			 */
+			case 'fp_reward_point_for_vk_like':
+				$earned_for = __( 'VK Like', 'klaviyo-sumo' );
+				break;
+			/**
+			 * OK.RU Share.
+			 */
+			case 'fp_reward_point_for_okru_share':
+				$earned_for = __( 'OK.RU Share', 'klaviyo-sumo' );
+				break;
+			/**
+			 * Registration.
+			 *
+			 * This event cannot be tracked, as it runs before the user has been
+			 * logged in, and the hook does not provide a user ID, meaning we don't
+			 * have a customer we can track the event for.
+			 */
+			case 'fp_reward_point_for_registration':
+				return;
+			/**
+			 * Login.
+			 *
+			 * This event cannot be tracked, as it the actual hook runs on every page
+			 * load, which is too often to make API requests, and it doesn't provide any
+			 * useful information about the number of points earned.
+			 *
+			 * Instead we will separately track the user's points balance using the
+			 * Identify API on the actual login hook.
+			 */
+			case 'fp_reward_point_for_login':
+				return;
+		}
+
+		/**
+		 * Send tracking request.
+		 */
+		$this->track_points(
+			__( 'Reward Points Earned', 'klaviyo-sumo' ),
+			null,
+			[
+				__( 'Earned For', 'klaviyo-sumo' ) => $earned_for,
+			]
+		);
+	}
+
+	/**
+	 * Update rewards points balance when a user logs in.
+	 *
+	 * @param string  $user_login User's username.
+	 * @param WP_User $user       User data.
+	 *
+	 * @return void
+	 */
+	public function identify_points_on_wp_login( $user_login, $user ) {
+		$this->identify_points( $user->ID );
+	}
+
+	/**
+	 * Update user's rewards points balance when a their membership status changes.
+	 *
+	 * @param int    $membership_id Membership post ID.
+	 * @param int    $plan_id       Membership Plan post ID.
+	 * @param string $status        New status for the membership.
+	 *
+	 * @return void
+	 */
+	public function identify_points_on_membership_status_change( $membership_id, $plan_id, $new_status ) {
+		$user_id = get_post_meta( $membership_id, 'sumomemberships_userid', true );
+
+		$this->identify_points( $user_id );
+	}
+
+	/**
+	 * Update user's rewards points balance when their account details are saved.
+	 *
+	 * @param int $user_id User ID.
+	 *
+	 * @return void
+	 */
+	public function identify_points_on_save_account_details( $user_id ) {
+		$this->identify_points( $user_id );
+	}
+
+	/**
+	 * Update customer's rewards points balance when an order is placed.
+	 *
+	 * @param int $order_id Order ID.
+	 *
+	 * @return void
+	 */
+	public function identify_points_on_order( $order_id ) {
+		$order = wc_get_order( $order_id );
+
+		$this->identify_points( $order->get_customer_id() );
 	}
 
 	/**
@@ -69,7 +291,47 @@ class TrackRewardPoints implements HasActions {
 	 *
 	 * @return void
 	 */
-	protected function track_points( $event_name, $user_id = 0 ) {
+	protected function track_points( $event_name, $user_id = null, $event_properties = [] ) {
+		$customer_properties = $this->get_customer_properties( $user_id );
+
+		if ( ! $customer_properties ) {
+			return;
+		}
+
+		/**
+		 * Send tracking request.
+		 */
+		$this->klaviyo->track(
+			$event_name,
+			$customer_properties,
+			$event_properties
+		);
+	}
+
+	/**
+	 * Identify points balance for a given user.
+	 */
+	protected function identify_points( $user_id = null ) {
+		$customer_properties = $this->get_customer_properties( $user_id );
+
+		if ( ! $customer_properties ) {
+			return;
+		}
+
+		/**
+		 * Send tracking request.
+		 */
+		$this->klaviyo->identify( $customer_properties );
+	}
+
+	/**
+	 * Get an array of points balances for a given user.
+	 *
+	 * @param int $user_id User ID.
+	 *
+	 * @return array Array of points balances.
+	 */
+	protected function get_customer_properties( $user_id = null ) {
 		/**
 		 * Get the user object for the given user, or the current user if no
 		 * ID is provided.
@@ -81,7 +343,7 @@ class TrackRewardPoints implements HasActions {
 		 * anything for them.
 		 */
 		if ( ! $user || ! $user->user_email ) {
-			return;
+			return false;
 		}
 
 		/**
@@ -90,23 +352,14 @@ class TrackRewardPoints implements HasActions {
 		$points_data = new RS_Points_Data( $user_id );
 
 		/**
-		 * Send tracking request.
+		 * Return an array of customer properties to track.
 		 */
-		$this->klaviyo->track(
-			$event_name,
-			[
-				'$email'          => $user->user_email,
-				'Points Balance'  => $points_data->total_available_points(),
-				'Points Earned'   => $points_data->total_earned_points(),
-				'Points Redeemed' => $points_data->total_redeemed_points(),
-				'Points Expired'  => $points_data->total_expired_points(),
-			],
-			[
-				'New Points Balance'  => $points_data->total_available_points(),
-				'New Points Earned'   => $points_data->total_earned_points(),
-				'New Points Redeemed' => $points_data->total_redeemed_points(),
-				'New Points Expired'  => $points_data->total_expired_points(),
-			]
-		);
+		return [
+			'$email'          => $user->user_email,
+			'Points Balance'  => $points_data->total_available_points(),
+			'Points Earned'   => $points_data->total_earned_points(),
+			'Points Redeemed' => $points_data->total_redeemed_points(),
+			'Points Expired'  => $points_data->total_expired_points(),
+		];
 	}
 }

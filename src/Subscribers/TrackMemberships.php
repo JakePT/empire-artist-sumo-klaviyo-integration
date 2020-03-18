@@ -39,10 +39,36 @@ class TrackMemberships implements HasActions {
 	 */
 	public function get_actions() {
 		return [
+			'user_register'                                  => [ 'track_user_register' ],
 			'sumomemberships_plan_status_changed'            => [ 'track_membership_status_change', 10, 3 ],
 			'sumomemberships_add_new_plan_upon_order_status' => [ 'track_new_membership_from_order', 10, 4 ],
 			'sumomemberships_manual_plan_updation'           => [ 'track_membership_plan_update', 10, 4 ],
 		];
+	}
+
+	/**
+	 * Track user registration.
+	 *
+	 * @param int $user_id User ID.
+	 *
+	 * @return void
+	 */
+	public function track_user_register( $user_id ) {
+		$user = get_userdata( $user_id );
+
+		if ( ! $user ) {
+			return false;
+		}
+
+		/**
+		 * Send tracking request.
+		 */
+		$this->klaviyo->track(
+			__( 'Account Created', 'klaviyo-sumo' ),
+			[
+				'$email' => $user->user_email,
+			]
+		);
 	}
 
 	/**

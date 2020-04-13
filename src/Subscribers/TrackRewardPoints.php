@@ -58,6 +58,8 @@ class TrackRewardPoints implements HasActions {
 			'fp_reward_point_for_okru_share'                => [ 'track_points_earned' ],
 			'fp_reward_point_for_registration'              => [ 'track_points_earned' ],
 			'fp_reward_point_for_login'                     => [ 'track_points_earned' ],
+			'fp_signup_points_for_referrer'                 => [ 'track_points_for_referral', 10, 3 ],
+			'fp_signup_points_for_getting_referred'         => [ 'track_points_for_getting_referred', 10, 3 ],
 			'wp_login'                                      => [ 'identify_points_on_wp_login', 10, 2 ],
 			'sumomemberships_plan_status_changed'           => [ 'identify_points_on_membership_status_change', 10, 2 ],
 			'woocommerce_save_account_details'              => [ 'identify_points_on_save_account_details', 10, 1 ],
@@ -80,8 +82,8 @@ class TrackRewardPoints implements HasActions {
 			__( 'Reward Points Redeemed', 'klaviyo-sumo' ),
 			$order->get_customer_id(),
 			[
-				__( 'Amount', 'klaviyo-sumo' )   => $points_redeemed,
-				__( 'Order ID', 'klaviyo-sumo' ) => $order_id,
+				__( 'Points Redeemed', 'klaviyo-sumo' ) => $points_redeemed,
+				__( 'Order ID', 'klaviyo-sumo' )        => $order_id,
 			]
 		);
 	}
@@ -104,8 +106,8 @@ class TrackRewardPoints implements HasActions {
 			__( 'Reward Points Purchased', 'klaviyo-sumo' ),
 			null,
 			[
-				__( 'Amount', 'klaviyo-sumo' )     => $points_earned,
-				__( 'Product ID', 'klaviyo-sumo' ) => $product_id,
+				__( 'Points Earned', 'klaviyo-sumo' ) => $points_earned,
+				__( 'Product ID', 'klaviyo-sumo' )    => $product_id,
 			]
 		);
 	}
@@ -229,6 +231,58 @@ class TrackRewardPoints implements HasActions {
 			null,
 			[
 				__( 'Earned For', 'klaviyo-sumo' ) => $earned_for,
+			]
+		);
+	}
+
+	/**
+	 * Track reward points earned for referring a user.
+	 *
+	 * @param int $referrer_user_id ID of the referring user.
+	 * @param int $user_id          ID of the user being referred.
+	 * @param int $points_earned    Number of points earned.
+	 *
+	 * @return void
+	 */
+	public function track_points_for_referral( $referrer_user_id, $referred_user_id, $points_earned ) {
+		$referred_user = get_userdata( $referred_user_id );
+
+		/**
+		 * Track points for user being referred.
+		 */
+		$this->track_points(
+			__( 'Reward Points Earned', 'klaviyo-sumo' ),
+			$referrer_user_id,
+			[
+				__( 'Earned For', 'klaviyo-sumo' )    => __( 'Referral ', 'klaviyo-sumo' ),
+				__( 'Referred', 'klaviyo-sumo' )      => $referred_user->user_email,
+				__( 'Points Earned', 'klaviyo-sumo' ) => $points_earned,
+			]
+		);
+	}
+
+	/**
+	 * Track reward points earned for being referred.
+	 *
+	 * @param int $referrer_user_id ID of the referring user.
+	 * @param int $user_id          ID of the user being referred.
+	 * @param int $points_earned    Number of points earned.
+	 *
+	 * @return void
+	 */
+	public function track_points_for_getting_referred( $referrer_user_id, $referred_user_id, $points_earned ) {
+		$referrer_user = get_userdata( $referrer_user_id );
+
+		/**
+		 * Track points for user being referred.
+		 */
+		$this->track_points(
+			__( 'Reward Points Earned', 'klaviyo-sumo' ),
+			$referred_user_id,
+			[
+				__( 'Earned For', 'klaviyo-sumo' )    => __( 'Being Referred', 'klaviyo-sumo' ),
+				__( 'Referred By', 'klaviyo-sumo' )   => $referrer_user->user_email,
+				__( 'Points Earned', 'klaviyo-sumo' ) => $points_earned,
 			]
 		);
 	}

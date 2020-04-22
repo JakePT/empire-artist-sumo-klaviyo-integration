@@ -30,7 +30,7 @@ class Plugin {
 	 */
 	public function __construct() {
 		$settings = (array) get_option( 'klaviyo_settings' );
-		$klaviyo  = new Klaviyo( $settings['klaviyo_public_api_key'] ?? '' );
+		$klaviyo  = new Klaviyo( $settings['public_api_key'] ?? '' );
 
 		$this->subscribers = [
 			'track_memberships'   => new TrackMemberships( $klaviyo ),

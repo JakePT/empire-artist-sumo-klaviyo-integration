@@ -12,6 +12,8 @@ use RS_Points_Data;
 use WP_User;
 use EmpireArtist\KlaviyoSumo\Interfaces\HasActions;
 use EmpireArtist\KlaviyoSumo\Clients\Klaviyo;
+use function EmpireArtist\KlaviyoSumo\get_referral_link;
+use function EmpireArtist\KlaviyoSumo\get_referral_qr_url;
 
 /**
  * Subscribe to WordPress and WooCommerce hooks to provide reward point tracking
@@ -63,7 +65,7 @@ class TrackRewardPoints implements HasActions {
 			'fp_product_purchase_points_for_referrer'         => [ 'track_points_for_referral', 10, 3 ],
 			'fp_product_purchase_points_for_getting_referred' => [ 'track_points_for_getting_referred', 10, 3 ],
 			'wp_login'                                        => [ 'identify_points_on_wp_login', 10, 2 ],
-			'sumomemberships_plan_status_changed'             => [ 'identify_points_on_membership_status_change', 10, 2 ],
+			'sumomemberships_plan_status_changed'             => [ 'identify_points_on_membership_status_change', 10, 3 ],
 			'woocommerce_save_account_details'                => [ 'identify_points_on_save_account_details', 10, 1 ],
 			'woocommerce_thankyou'                            => [ 'identify_points_on_order', 999, 1 ],
 		];

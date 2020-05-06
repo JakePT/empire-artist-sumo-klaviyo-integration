@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 use EmpireArtist\KlaviyoSumo\Clients\Klaviyo;
 use EmpireArtist\KlaviyoSumo\Interfaces\HasActions;
 use EmpireArtist\KlaviyoSumo\Interfaces\HasFilters;
+use EmpireArtist\KlaviyoSumo\Subscribers\QRReferralLink;
 use EmpireArtist\KlaviyoSumo\Subscribers\TrackRewardPoints;
 use EmpireArtist\KlaviyoSumo\Subscribers\TrackMemberships;
 
@@ -35,6 +36,7 @@ class Plugin {
 		$this->subscribers = [
 			'track_memberships'   => new TrackMemberships( $klaviyo ),
 			'track_reward_points' => new TrackRewardPoints( $klaviyo ),
+			'qr_referral_link'    => new QRReferralLink(),
 		];
 	}
 

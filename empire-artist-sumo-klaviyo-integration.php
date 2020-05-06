@@ -15,6 +15,7 @@ namespace EmpireArtist\KlaviyoSumo;
 defined( 'ABSPATH' ) || exit;
 
 require_once 'vendor/autoload.php';
+require_once 'functions.php';
 
 $klaviyo_sumo = Factories\PluginFactory::create();
 

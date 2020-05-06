@@ -412,40 +412,13 @@ class TrackRewardPoints implements HasActions {
 		 * Return an array of customer properties to track.
 		 */
 		return [
-			'$email'               => $user->user_email,
-			'Points Balance'       => $points_data->total_available_points(),
-			'Points Earned'        => $points_data->total_earned_points(),
-			'Points Redeemed'      => $points_data->total_redeemed_points(),
-			'Points Expired'       => $points_data->total_expired_points(),
-			'Referral Link'        => $this->get_referral_link( $user ),
+			'$email'                    => $user->user_email,
+			'Points Balance'            => $points_data->total_available_points(),
+			'Points Earned'             => $points_data->total_earned_points(),
+			'Points Redeemed'           => $points_data->total_redeemed_points(),
+			'Points Expired'            => $points_data->total_expired_points(),
+			'Referral Link'             => get_referral_link( $user ),
+			'Referral Link QR Code URL' => get_referral_qr_url( $user ),
 		];
-	}
-
-	/**
-	 * Get a customer's referral link.
-	 *
-	 * Method based on code in SUMO Reward Points 24.3.
-	 *
-	 * @param WP_User $user User object.
-	 */
-	protected function get_referral_link( WP_User $user ) {
-		$base_url = get_option( 'rs_static_generate_link' );
-
-		if ( ! $base_url ) {
-			return null;
-		}
-
-		$refer_by_username = ( '1' === get_option( 'rs_generate_referral_link_based_on_user' ) );
-		$ip_restricted     = ( 'yes' === get_option( 'rs_restrict_referral_points_for_same_ip' ) );
-
-		$query_args = [
-			'ref' => $refer_by_username ? $user->user_login : $user->ID,
-		];
-
-		if ( $ip_restricted ) {
-			$query_args['ip']  = base64_encode( get_referrer_ip_address() );
-		}
-
-		return add_query_arg( $query_args, $base_url ) ;
 	}
 }

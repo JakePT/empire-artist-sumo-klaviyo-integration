@@ -65,7 +65,7 @@ function get_referral_link( WP_User $user ) {
  * @return string URL to user's referral link QR coe.
  */
 function get_referral_qr_url( WP_User $user ) {
-	$path = sprintf( '/qr/%s', $user->user_login );
+	$path = sprintf( '/qr/%s', urlencode( $user->user_login ) );
 
 	return home_url( $path );
 }

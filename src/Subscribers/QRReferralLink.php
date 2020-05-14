@@ -60,7 +60,7 @@ class QRReferralLink implements HasActions, HasFilters {
 	 * @return void
 	 */
 	public function add_rewrite_rule() {
-		add_rewrite_rule( 'qr/([a-z0-9]{3,16})[/]?$', 'index.php?empire_artist_qr=$matches[1]', 'top' );
+		add_rewrite_rule( 'qr/(.{1,16})[/]?$', 'index.php?empire_artist_qr=$matches[1]', 'top' );
 	}
 
 
@@ -91,7 +91,7 @@ class QRReferralLink implements HasActions, HasFilters {
 			return;
 		}
 
-		$user = get_user_by( 'login', $username );
+		$user = get_user_by( 'login', urldecode( $username ) );
 
 		if ( ! $user ) {
 			status_header( 404 );
@@ -114,7 +114,7 @@ class QRReferralLink implements HasActions, HasFilters {
 		header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + 86400 ) );
 
 		QRcode::png( $url, false, QR_ECLEVEL_L, 16 );
-		
+
 		exit;
 	}
 

@@ -60,7 +60,7 @@ class QRReferralLink implements HasActions, HasFilters {
 	 * @return void
 	 */
 	public function add_rewrite_rule() {
-		add_rewrite_rule( 'qr/(.{1,16})[/]?$', 'index.php?empire_artist_qr=$matches[1]', 'top' );
+		add_rewrite_rule( 'qr/(.*)[/]?$', 'index.php?empire_artist_qr=$matches[1]', 'top' );
 	}
 
 
